@@ -1,0 +1,7 @@
+numpy
+scipy
+matplotlib
+jupyter
+ipython
+h5py
+healpy
