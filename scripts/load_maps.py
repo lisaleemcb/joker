@@ -1,11 +1,11 @@
 import numpy as np
 import healpy as hp
-from cosmology import *
 
 # from astropy.io import fits
 import h5py
 # import matplotlib.pyplot as plt
 
+from joker.cosmology import *
 from joker.maps import *
 
 print("hello, world!")

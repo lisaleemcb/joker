@@ -1,6 +1,6 @@
 import pytest
 
-from joker.skeleton import fib, main
+from joker.maps import fib, main
 
 __author__ = "Lisa McBride"
 __copyright__ = "Lisa McBride"
