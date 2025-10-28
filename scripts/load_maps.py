@@ -72,9 +72,9 @@ print(mask.sum() / len(redshift))
 
 print("Making maps...")
 
-map_halo = make_sky(halos, weights=halos["M200m"])
-map_CO = make_sky(halos, weights=np.sum(CO_90, axis=0))
-map_CIB = make_sky(halos, weights=CIB_90p2)
+map_halo = make_sky(halos, mask=mask, weights=halos["M200m"])
+map_CO = make_sky(halos, mask=mask, weights=np.sum(CO_90, axis=0))
+map_CIB = make_sky(halos, mask=mask, weights=CIB_90p2)
 
 print("Zooming in...")
 
@@ -84,8 +84,8 @@ patch_CIB = zoom_in(map_CIB)
 
 print("Saving files...")
 
-np.save("patch_halos", patch_halos)
-np.save("patch_CO", patch_CO)
-np.save("patch_CIB", patch_CIB)
+np.save("patch_halos_z2", patch_halos)
+np.save("patch_CO_z2", patch_CO)
+np.save("patch_CIB_z2", patch_CIB)
 
 print("Et voila !")
