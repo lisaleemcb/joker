@@ -31,8 +31,6 @@ halos["redshift"] = redshift
 
 print(f"Now loading CO fluxes...")
 CO_90 = []
-nCO = 0
-index = 0
 for i in range(1, 5):
     filename = f"{dir_co}/cen_chunk{i}_fluxCO_090.h5"
     print(filename)
@@ -49,6 +47,25 @@ for i in range(1, 5):
 
 CO_90 = np.concatenate(CO_90, axis=1)
 
+print(f"Now loading CIB fluxes...")
+CIB_90p2 = []
+
+for i in range(1, 5):
+    filename = f"{dir_co}/cen_chunk{i}_flux_90.2.h5"
+    print(filename)
+    with h5py.File(filename, "r") as f:
+        # List all groups (like folders in the file)
+        print(f"Keys:", list(f.keys()))
+
+        # Access a dataset by key\n",
+        data = f["flux"][:]  # Load it into a NumPy array
+        print("Data shape:", data.shape)
+        print("Data type:", data.dtype)
+
+        CIB_90p2.append(data)
+
+CIB_90p2 = np.concatenate(CIB_90p2, axis=1)
+
 
 mask = (redshift <= 2.05) & (redshift >= 1.95)
 print(mask.sum() / len(redshift))
@@ -57,15 +74,18 @@ print("Making maps...")
 
 map_halo = make_sky(halos, weights=halos["M200m"])
 map_CO = make_sky(halos, weights=np.sum(CO_90, axis=0))
+map_CIB = make_sky(halos, weights=CIB_90p2)
 
 print("Zooming in...")
 
 patch_halos = zoom_in(map_halo)
 patch_CO = zoom_in(map_CO)
+patch_CIB = zoom_in(map_CIB)
 
 print("Saving files...")
 
 np.save("patch_halos", patch_halos)
 np.save("patch_CO", patch_CO)
+np.save("patch_CIB", patch_CIB)
 
 print("Et voila !")
