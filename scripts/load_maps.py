@@ -64,7 +64,7 @@ for i in range(1, 5):
 
         CIB_90p2.append(data)
 
-CIB_90p2 = np.concatenate(CIB_90p2, axis=1)
+CIB_90p2 = np.concatenate(CIB_90p2)
 
 
 mask = (redshift <= 2.05) & (redshift >= 1.95)
