@@ -61,7 +61,7 @@ def make_sky(coordinates, nside=resolution, mask=None, weights=None):
 
     sky = np.zeros((hp.nside2npix(nside)))
 
-    if mask == None:
+    if mask is None:
         mask = np.ones_like(coordinates["x"], dtype=bool)
 
     pix = hp.vec2pix(
@@ -69,7 +69,7 @@ def make_sky(coordinates, nside=resolution, mask=None, weights=None):
     )
     pix = hp.ang2pix(nside, coordinates["theta"], coordinates["phi"])  # does the same
 
-    if weights == None:
+    if weights is None:
         weights = np.ones_like(coordinates["x"])
 
     np.add.at(sky, pix, weights)
