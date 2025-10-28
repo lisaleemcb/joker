@@ -49,7 +49,7 @@ _logger = logging.getLogger(__name__)
 resolution = 4096
 
 
-def make_sky(coordinates, nside, mask=None, weights=None):
+def make_sky(coordinates, nside=resolution, mask=None, weights=None):
     """Fibonacci example function
 
     Args:
@@ -89,7 +89,7 @@ def zoom_in(sky, nside=resolution):
 
     # Create 2D grid of theta/phi
     npix_x = 400
-    npix_y = 200
+    npix_y = 500
     theta_offsets = np.radians(np.linspace(-height_deg / 2, height_deg / 2, npix_y))
     phi_offsets = np.radians(np.linspace(-width_deg / 2, width_deg / 2, npix_x))
     theta_grid, phi_grid = np.meshgrid(theta_offsets, phi_offsets, indexing="ij")

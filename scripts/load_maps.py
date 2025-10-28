@@ -14,11 +14,9 @@ dir_websky = "/home/emc-brid/Websky_maps"
 dir_rewrite = "/home/emc-brid/websky_halos_rewrite"
 dir_co = "/home/emc-brid/cib_co_data"
 
-resolution = 4096
 
 filename = f"{dir_rewrite}/websky_halos-lesslight_20230612.h5"
 print(f"Now loading in {filename}...")
-
 halos = {}
 with h5py.File(filename, "r") as f:
     # List all groups (like folders in the file)
@@ -32,9 +30,7 @@ redshift = zofchi(chi)
 halos["redshift"] = redshift
 
 print(f"Now loading CO fluxes...")
-
 CO_90 = []
-
 nCO = 0
 index = 0
 for i in range(1, 5):
