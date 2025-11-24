@@ -24,14 +24,13 @@ import argparse
 import logging
 import sys
 
-import healpy as hp
-from joker.cosmology import *
-
 # from astropy.io import fits
 import h5py
+import healpy as hp
 import matplotlib.pyplot as plt
 
 from joker import __version__
+from joker.cosmology import *
 
 __author__ = "Lisa McBride"
 __copyright__ = "Lisa McBride"
@@ -49,14 +48,17 @@ _logger = logging.getLogger(__name__)
 resolution = 4096
 
 
-def make_sky(coordinates, nside=resolution, mask=None, weights=None):
-    """Fibonacci example function
+def make_sky(
+    coordinates, nside=resolution, mask=None, weights=None, fwhm=None, verbose=False
+):
+    """Make sky from data
 
     Args:
       n (int): integer
+      mask (arr): mask in order to pick out certain redshifts
 
     Returns:
-      int: n-th Fibonacci number
+      int: healpix map
     """
 
     sky = np.zeros((hp.nside2npix(nside)))
@@ -74,24 +76,27 @@ def make_sky(coordinates, nside=resolution, mask=None, weights=None):
 
     np.add.at(sky, pix, weights)
 
+    if fwhm is not None:
+        if verbose:
+            print(f"Smoothing map assuming fwhm={fwhm}...")
+
+        sky = hp.sphtfunc.smoothing(sky, fwhm=fwhm)
+
     return sky
 
 
-def zoom_in(sky, nside=resolution):
-    dec_center = -30.7
-    ra_center = 0.0
-    width_deg = 20
-    height_deg = 10
+def zoom_in(sky, nside=resolution, coordinates=(0.0, -30.7), width=20, height=10):
+    ra, dec = coordinates
 
     # Convert to radians
-    theta_center = np.radians(90 - dec_center)
-    phi_center = np.radians(ra_center)
+    theta_center = np.radians(90 - dec)
+    phi_center = np.radians(ra)
 
     # Create 2D grid of theta/phi
     npix_x = 400
     npix_y = 500
-    theta_offsets = np.radians(np.linspace(-height_deg / 2, height_deg / 2, npix_y))
-    phi_offsets = np.radians(np.linspace(-width_deg / 2, width_deg / 2, npix_x))
+    theta_offsets = np.radians(np.linspace(-height / 2, height / 2, npix_y))
+    phi_offsets = np.radians(np.linspace(-width / 2, width / 2, npix_x))
     theta_grid, phi_grid = np.meshgrid(theta_offsets, phi_offsets, indexing="ij")
     theta = theta_center + theta_grid
     phi = phi_center + phi_grid
