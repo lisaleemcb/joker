@@ -54,7 +54,7 @@ def make_halo_catalogue(filename, verbose=False):
         print(f"Loading halo catalogue from {filename}")
     halos = {}
 
-    ext = os.path.splitext(filename)
+    basename, ext = os.path.splitext(filename)
     if verbose:
         print(f"Parsing file type {ext}...")
 
