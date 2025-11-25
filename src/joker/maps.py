@@ -20,6 +20,7 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
+import os
 import argparse
 import logging
 import sys
@@ -47,14 +48,24 @@ _logger = logging.getLogger(__name__)
 
 resolution = 4096
 
-
-def make_halo_catalogue(filename, verbose):
+def make_halo_catalogue(filename, verbose=False):
     if verbose:
         print(f"Loading halo catalogue from {filename}")
-
     halos = {}
-    with h5py.File(filename, "r") as f:
-        # List all groups (like folders in the file)
+
+    ext = os.path.splitext(filename)
+    if verbose:
+        print(f"Parsing file type {ext}...")
+
+    if ext == '.h5'
+        with h5py.File(filename, "r") as f:
+            # List all groups (like folders in the file)
+            for key, item in f.items():
+                print(f"adding {key}...")
+                halos[key] = item[()]
+
+    elif ext == '.npz'
+        f = np.load(filename, allow_pickle=True)
         for key, item in f.items():
             print(f"adding {key}...")
             halos[key] = item[()]
@@ -63,6 +74,8 @@ def make_halo_catalogue(filename, verbose):
     redshift = zofchi(chi)
 
     halos["redshift"] = redshift
+
+    return halos
 
 
 def make_sky(
@@ -91,7 +104,7 @@ def make_sky(
     if weights is None:
         weights = np.ones_like(coordinates["x"])
 
-    np.add.at(sky, pix, weights)
+    np.add.at(sky, pix, weights[mask])
 
     if fwhm is not None:
         if verbose:
