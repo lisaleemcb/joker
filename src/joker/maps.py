@@ -48,6 +48,23 @@ _logger = logging.getLogger(__name__)
 resolution = 4096
 
 
+def make_halo_catalogue(filename, verbose):
+    if verbose:
+        print(f"Loading halo catalogue from {filename}")
+
+    halos = {}
+    with h5py.File(filename, "r") as f:
+        # List all groups (like folders in the file)
+        for key, item in f.items():
+            print(f"adding {key}...")
+            halos[key] = item[()]
+
+    chi = np.sqrt(halos["x"] ** 2 + halos["y"] ** 2 + halos["z"] ** 2)  # Mpc
+    redshift = zofchi(chi)
+
+    halos["redshift"] = redshift
+
+
 def make_sky(
     coordinates, nside=resolution, mask=None, weights=None, fwhm=None, verbose=False
 ):
@@ -69,7 +86,7 @@ def make_sky(
     pix = hp.vec2pix(
         nside, coordinates["x"][mask], coordinates["y"][mask], coordinates["z"][mask]
     )
-    pix = hp.ang2pix(nside, coordinates["theta"], coordinates["phi"])  # does the same
+    # pix = hp.ang2pix(nside, coordinates["theta"], coordinates["phi"])  # does the same
 
     if weights is None:
         weights = np.ones_like(coordinates["x"])

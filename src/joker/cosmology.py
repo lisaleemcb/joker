@@ -1,5 +1,5 @@
-from scipy.interpolate import *
 import numpy as np
+from scipy.interpolate import interp1d
 
 omegab = 0.049
 omegac = 0.261
