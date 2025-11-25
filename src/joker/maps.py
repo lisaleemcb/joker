@@ -20,9 +20,9 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
-import os
 import argparse
 import logging
+import os
 import sys
 
 # from astropy.io import fits
@@ -48,6 +48,7 @@ _logger = logging.getLogger(__name__)
 
 resolution = 4096
 
+
 def make_halo_catalogue(filename, verbose=False):
     if verbose:
         print(f"Loading halo catalogue from {filename}")
@@ -57,14 +58,20 @@ def make_halo_catalogue(filename, verbose=False):
     if verbose:
         print(f"Parsing file type {ext}...")
 
-    if ext == '.h5'
+    allowed_exts = [".h5", ".npz"]
+    if ext not in allowed_exts:
+        raise ValueError(
+            f"File extension '{ext}' not allowed. Allowed extensions are: {allowed_exts}"
+        )
+
+    if ext == ".h5":
         with h5py.File(filename, "r") as f:
             # List all groups (like folders in the file)
             for key, item in f.items():
                 print(f"adding {key}...")
                 halos[key] = item[()]
 
-    elif ext == '.npz'
+    elif ext == ".npz":
         f = np.load(filename, allow_pickle=True)
         for key, item in f.items():
             print(f"adding {key}...")
