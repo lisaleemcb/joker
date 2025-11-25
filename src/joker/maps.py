@@ -58,7 +58,6 @@ def make_halo_catalogue(filename, verbose=False):
     if verbose:
         print(f"Parsing file type {ext}...")
 
-<<<<<<< HEAD
     allowed_exts = [".h5", ".npz"]
     if ext not in allowed_exts:
         raise ValueError(
@@ -66,13 +65,6 @@ def make_halo_catalogue(filename, verbose=False):
         )
 
     if ext == ".h5":
-=======
-    allowed_exts = ['.h5', '.npz']
-    if ext not in allowed_exts:
-        raise ValueError(f"File extension '{ext}' not allowed. Allowed extensions are: {allowed_exts}")
-
-    if ext == '.h5'
->>>>>>> 45f91a7fa2ec39d77588e561830a0f812a77bc75
         with h5py.File(filename, "r") as f:
             # List all groups (like folders in the file)
             for key, item in f.items():
