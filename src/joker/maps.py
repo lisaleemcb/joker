@@ -115,7 +115,7 @@ def make_sky(
 
     if fwhm is not None:
         if verbose:
-            print(f"Smoothing map assuming fwhm={fwhm}...")
+            print(f"Smoothing map assuming fwhm={fwhm:.3f}...")
 
         sky = hp.sphtfunc.smoothing(sky, fwhm=fwhm)
 

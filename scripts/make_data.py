@@ -51,17 +51,19 @@ print("saved patch_halo_masked!")
 
 print()
 
-print(f"Now loading on tSZ signal...")
+print("Now loading on tSZ signal...")
 tsz = hp.read_map(f"{dir_websky}/websky/0.4/tsz_8192_hp.fits", h=False)
 tsz = hp.smoothing(tsz, fwhm=fwhm)
 patch_tsz = maps.zoom_in(tsz)
 
 np.save("patch_tsz", patch_tsz)
 
-print(f"Now loading CIB signal...")
-path_cib = "/data/cluster/emc-brid/Datasets/Websky/websky_main/v0.0"
+print("Now loading CIB signal...")
+path_cib = "/data/cluster/emc-brid/Datasets/Websky/websky/v0.0"
 suffix = "cib_nu"
-cib_freqs = ["0093", "0143", "0217"]
+# cib_freqs = ["0093", "0143", "0217"]
+
+cib_freqs = ["0100", "0143", "0145", "0217", "0278", "0353", "0545", "0857"]
 
 data_cib = []
 
@@ -76,5 +78,62 @@ data_cib = np.asarray(data_cib)
 
 print("Saving data_cib...")
 np.save("data_cib", data_cib)
+
+print("Now loading CO signal...")
+CO_freqs = ["090", "150", "220"]
+
+CO_fluxes = []
+
+for freq in CO_freqs:
+    CO_chunks = []
+    for chunk in [1, 2, 3, 4]:
+        filename = f"{dir_co}/cen_chunk{chunk}_fluxCO_{freq}.h5"
+        print(filename)
+        with h5py.File(filename, "r") as f:
+            # List all groups (like folders in the file)
+            # print(f"Keys:", list(f.keys()))
+
+            # Access a dataset by key\n",
+            data = f["flux"][:]  # Load it into a NumPy array
+            # print("Data shape:", data.shape)
+            # print("Data type:", data.dtype)
+
+            CO_chunks.append(data)
+
+    CO_fluxes.append(np.concatenate(CO_chunks, axis=1))
+
+maps_CO_090 = []
+maps_CO_150 = []
+maps_CO_220 = []
+
+for i in range(7):
+    print(f"Now on {i}...")
+    m = maps.make_sky(
+        halos, weights=CO_fluxes[0][i], fwhm=fwhm, mask=redshift_mask, verbose=True
+    )
+    p = maps.zoom_in(m)
+
+    maps_CO_090.append(p)
+
+    m = maps.make_sky(
+        halos, weights=CO_fluxes[1][i], fwhm=fwhm, mask=redshift_mask, verbose=True
+    )
+    p = maps.zoom_in(m)
+
+    maps_CO_150.append(p)
+
+    m = maps.make_sky(
+        halos, weights=CO_fluxes[2][i], fwhm=fwhm, mask=redshift_mask, verbose=True
+    )
+    p = maps.zoom_in(m)
+
+    maps_CO_220.append(p)
+
+print("saving CO patches...")
+np.save("maps_CO_090", maps_CO_090)
+np.save("maps_CO_150", maps_CO_150)
+np.save("maps_CO_220", maps_CO_220)
+
+print("finished!")
 
 print("Et voila !")
