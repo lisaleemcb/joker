@@ -12,10 +12,10 @@ print("hello, world!")
 dir_data = f"/data/cluster/emc-brid/Datasets/Websky"
 dir_websky = f"{dir_data}/websky/v0.0"
 dir_rewrite = f"{dir_data}/websky_halos_rewrite"
-dir_co = f"{dir_data}/cib_co_data"
+dir_co = f"{dir_data}/cib_co_sources/cib_co_sources"
 
 fwhm = np.deg2rad(20.0 / 60)  # to convert arcmin to degrees
-redshift_range = [3.5, 5.0]
+redshift_range = [2.4, 3.4]
 
 halo_filename = f"{dir_rewrite}/websky_halos-lesslight_20230612.h5"
 halos = maps.make_halo_catalogue(halo_filename, verbose=True)
