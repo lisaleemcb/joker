@@ -9,27 +9,27 @@ import joker.maps as maps
 
 print("hello, world!")
 
-dir_data = f"/data/cluster/emc-brid/Datasets/Websky"
-dir_save = f"{dir_data}/patches"
+dir_data = "/data/cluster/emc-brid/Datasets/Websky"
+dir_save = f"{dir_data}/patches_z2p4_to_3p4"
 dir_websky = f"{dir_data}/websky/v0.0"
 dir_rewrite = f"{dir_data}/websky_halos_rewrite"
-dir_co = f"{dir_data}/cib_co_sources/cib_co_sources"
+dir_co = f"{dir_data}/cib_co_sources"
 
 fwhm = np.deg2rad(20.0 / 60)  # to convert arcmin to degrees
-
+redshift_range = [2.4, 3.4]
 
 halo_filename = f"{dir_rewrite}/websky_halos-lesslight_20230612.h5"
 halos = maps.make_halo_catalogue(halo_filename, verbose=True)
 
-# print(f"making full halo patch...")
-# map_halo = maps.make_sky(
-#     halos, weights=halos["M200m"] ** (5.0 / 3.0), fwhm=fwhm, verbose=True
-# )
+print(f"making full halo patch...")
+map_halo = maps.make_sky(
+    halos, weights=halos["M200m"] ** (5.0 / 3.0), fwhm=fwhm, verbose=True
+)
 
-# patch_halo = maps.zoom_in(map_halo)
+patch_halo = maps.zoom_in(map_halo)
 
-# np.save("patch_halo", patch_halo)
-# print("saved patch_halo!")
+np.save(f"{dir_save}/patch_halo", patch_halo)
+print("saved patch_halo!")
 
 print(f"making redshift-masked halo patch in range {redshift_range}...")
 
@@ -81,11 +81,23 @@ print("Saving data_cib...")
 np.save(f"{dir_save}/data_cib", data_cib)
 
 print("Now loading CO signal...")
-CO_freqs = ["090", "150", "220"]
 
+halo_fn_co = f"{dir_co}/websky_halos-light.hdf5"
+with h5py.File(halo_fn_co, "r") as f:
+    for key, item in f.items():
+        data = item[:]
+
+halos_co = dict(zip(["x", "y", "z", "M200m"], data.T))
+chi = np.sqrt(halos_co["x"] ** 2 + halos_co["y"] ** 2 + halos_co["z"] ** 2)  # Mpc
+redshift = cosmo.zofchi(chi)
+
+halos_co["redshift"] = redshift
+
+CO_obs_freqs = ["090", "150", "220"]
+CO_rest_freqs = [115.271, 230.538, 345.796, 461.041, 576.268, 691.473, 806.652]
 CO_fluxes = []
 
-for freq in CO_freqs:
+for freq in CO_obs_freqs:
     CO_chunks = []
     for chunk in [1, 2, 3, 4]:
         filename = f"{dir_co}/cen_chunk{chunk}_fluxCO_{freq}.h5"
@@ -107,7 +119,7 @@ maps_CO_090 = []
 maps_CO_150 = []
 maps_CO_220 = []
 
-for i in range(7):
+for i in range(len(CO_rest_freqs)):
     print(f"Now on {i}...")
     m = maps.make_sky(
         halos, weights=CO_fluxes[0][i], fwhm=fwhm, mask=redshift_mask, verbose=True
