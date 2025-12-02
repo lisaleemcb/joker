@@ -15,6 +15,10 @@ dir_websky = f"{dir_data}/websky/v0.0"
 dir_rewrite = f"{dir_data}/websky_halos_rewrite"
 dir_co = f"{dir_data}/cib_co_sources"
 
+print(f"SAVING ALL FILES TO {dir_save}!")
+
+print("=====================================")
+
 fwhm = np.deg2rad(20.0 / 60)  # to convert arcmin to degrees
 redshift_range = [2.4, 3.4]
 

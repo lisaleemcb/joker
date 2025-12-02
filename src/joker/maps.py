@@ -122,7 +122,7 @@ def make_sky(
     return sky
 
 
-def zoom_in(sky, nside=resolution, coordinates=(0.0, -30.7), width=20, height=10):
+def zoom_in(sky, nside=resolution, coordinates=(0.0, -30.7), width=20, height=20):
     ra, dec = coordinates
 
     # Convert to radians
