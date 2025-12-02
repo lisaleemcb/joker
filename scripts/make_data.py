@@ -10,25 +10,26 @@ import joker.maps as maps
 print("hello, world!")
 
 dir_data = f"/data/cluster/emc-brid/Datasets/Websky"
+dir_save = f"{dir_data}/patches"
 dir_websky = f"{dir_data}/websky/v0.0"
 dir_rewrite = f"{dir_data}/websky_halos_rewrite"
 dir_co = f"{dir_data}/cib_co_sources/cib_co_sources"
 
 fwhm = np.deg2rad(20.0 / 60)  # to convert arcmin to degrees
-redshift_range = [2.4, 3.4]
+
 
 halo_filename = f"{dir_rewrite}/websky_halos-lesslight_20230612.h5"
 halos = maps.make_halo_catalogue(halo_filename, verbose=True)
 
-print(f"making full halo patch...")
-map_halo = maps.make_sky(
-    halos, weights=halos["M200m"] ** (5.0 / 3.0), fwhm=fwhm, verbose=True
-)
+# print(f"making full halo patch...")
+# map_halo = maps.make_sky(
+#     halos, weights=halos["M200m"] ** (5.0 / 3.0), fwhm=fwhm, verbose=True
+# )
 
-patch_halo = maps.zoom_in(map_halo)
+# patch_halo = maps.zoom_in(map_halo)
 
-np.save("patch_halo", patch_halo)
-print("saved patch_halo!")
+# np.save("patch_halo", patch_halo)
+# print("saved patch_halo!")
 
 print(f"making redshift-masked halo patch in range {redshift_range}...")
 
@@ -46,7 +47,7 @@ map_halo_masked = maps.make_sky(
     verbose=True,
 )
 patch_halo_masked = maps.zoom_in(map_halo_masked)
-np.save("patch_halo_masked", patch_halo_masked)
+np.save(f"{dir_save}/patch_halo_masked", patch_halo_masked)
 print("saved patch_halo_masked!")
 
 print()
@@ -56,7 +57,7 @@ tsz = hp.read_map(f"{dir_websky}/websky/0.4/tsz_8192_hp.fits", h=False)
 tsz = hp.smoothing(tsz, fwhm=fwhm)
 patch_tsz = maps.zoom_in(tsz)
 
-np.save("patch_tsz", patch_tsz)
+np.save(f"{dir_save}/patch_tsz", patch_tsz)
 
 print("Now loading CIB signal...")
 path_cib = "/data/cluster/emc-brid/Datasets/Websky/websky/v0.0"
@@ -77,7 +78,7 @@ for freq in cib_freqs:
 data_cib = np.asarray(data_cib)
 
 print("Saving data_cib...")
-np.save("data_cib", data_cib)
+np.save(f"{dir_save}/data_cib", data_cib)
 
 print("Now loading CO signal...")
 CO_freqs = ["090", "150", "220"]
@@ -130,9 +131,9 @@ for i in range(7):
     maps_CO_220.append(p)
 
 print("saving CO patches...")
-np.save("maps_CO_090", maps_CO_090)
-np.save("maps_CO_150", maps_CO_150)
-np.save("maps_CO_220", maps_CO_220)
+np.save(f"{dir_save}/maps_CO_090", maps_CO_090)
+np.save(f"{dir_save}/maps_CO_150", maps_CO_150)
+np.save(f"{dir_save}/maps_CO_220", maps_CO_220)
 
 print("finished!")
 
