@@ -122,7 +122,7 @@ def make_sky(
     return sky
 
 
-def zoom_in(sky, nside=resolution, coordinates=(0.0, -30.7), width=20, height=20):
+def zoom_in(sky, nside=resolution, coordinates=(0.0, -20.0), width=10, height=10):
     ra, dec = coordinates
 
     # Convert to radians
@@ -130,7 +130,7 @@ def zoom_in(sky, nside=resolution, coordinates=(0.0, -30.7), width=20, height=20
     phi_center = np.radians(ra)
 
     # Create 2D grid of theta/phi
-    npix_x = 400
+    npix_x = 500
     npix_y = 500
     theta_offsets = np.radians(np.linspace(-height / 2, height / 2, npix_y))
     phi_offsets = np.radians(np.linspace(-width / 2, width / 2, npix_x))

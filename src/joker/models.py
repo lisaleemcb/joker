@@ -40,7 +40,7 @@ def synchrotron_per_nu(nu):
     nu_ref = 30.0 * 1.0e9  # Hz
     sync_beta = -1.2
 
-    scaling = (nu / nu_ref) ** sync_beta * G_nu(nu_ref, Tcmb) / G_nu(nu, Tcmb)
+    scaling = (nu / nu_ref) ** sync_beta  # * G_nu(nu_ref, Tcmb) / G_nu(nu, Tcmb)
 
     return scaling
 
@@ -52,7 +52,7 @@ def B_nu(nu, T):
     return 2.0 * h * nu**3.0 / (c**2.0 * np.expm1(h * nu / (k * T)))
 
 
-def G_nu(nu, T):
+def G_nu(nu, T=Tcmb):
     """
     Conversion factor from intensity to T_CMB, i.e. I_nu = G_nu * deltaT_CMB.
     """

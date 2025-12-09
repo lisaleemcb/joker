@@ -5,3 +5,4 @@ jupyter
 ipython
 h5py
 healpy
+pandas
