@@ -66,31 +66,16 @@ np.save(f"{dir_save}/patch_tsz", patch_tsz)
 
 print("tSZ patch saved!")
 
-print()
-
 print("Now loading synchrotron signal...")
-sync = hp.read_map(
-    "/data/cluster/emc-brid/Datasets/CMB/COM_CompMap_Synchrotron-commander_0256_R2.00.fits",
-    h=False,
-)
-sync = hp.smoothing(tsz, fwhm=fwhm)
-patch_sync = maps.zoom_in(sync)
+tsz = hp.read_map(f"{dir_websky}/websky/0.4/tsz_8192_hp.fits", h=False)
+tsz = hp.smoothing(tsz, fwhm=fwhm)
+patch_tsz = maps.zoom_in(tsz)
 
-np.save(f"{dir_save}/patch_sync", patch_sync)
+np.save(f"{dir_save}/patch_tsz", patch_tsz)
 
-print("synchrotron patch saved!")
+print("tSZ patch saved!")
 
-print("Now loading dust signal...")
-dust = hp.read_map(
-    "/data/cluster/emc-brid/Datasets/CMB/COM_CompMap_dust-commrul_2048_R1.00.fits",
-    h=False,
-)
-dust = hp.smoothing(dust, fwhm=fwhm)
-patch_dust = maps.zoom_in(dust)
-
-np.save(f"{dir_save}/patch_dust", patch_dust)
-
-print("dust patch saved!")
+print()
 
 print("Now loading CIB signal...")
 path_cib = "/data/cluster/emc-brid/Datasets/Websky/websky/v0.0"
@@ -115,107 +100,107 @@ np.save(f"{dir_save}/data_cib", data_cib)
 print()
 print("Now loading CO signal...")
 
-halo_fn_co = f"{dir_co}/websky_halos-light.hdf5"
-with h5py.File(halo_fn_co, "r") as f:
-    for key, item in f.items():
-        data = item[:]
+# halo_fn_co = f"{dir_co}/websky_halos-light.hdf5"
+# with h5py.File(halo_fn_co, "r") as f:
+#     for key, item in f.items():
+#         data = item[:]
 
-halos_co = dict(zip(["x", "y", "z", "M200m"], data.T))
-chi = np.sqrt(halos_co["x"] ** 2 + halos_co["y"] ** 2 + halos_co["z"] ** 2)  # Mpc
-redshift = cosmo.zofchi(chi)
+# halos_co = dict(zip(["x", "y", "z", "M200m"], data.T))
+# chi = np.sqrt(halos_co["x"] ** 2 + halos_co["y"] ** 2 + halos_co["z"] ** 2)  # Mpc
+# redshift = cosmo.zofchi(chi)
 
-halos_co["redshift"] = redshift
+# halos_co["redshift"] = redshift
 
-CO_obs_freqs = ["090", "150", "220"]
-CO_rest_freqs = [115.271, 230.538, 345.796, 461.041, 576.268, 691.473, 806.652]
-CO_fluxes_halos = []
-CO_fluxes_sats = []
+# CO_obs_freqs = ["090", "150", "220"]
+# CO_rest_freqs = [115.271, 230.538, 345.796, 461.041, 576.268, 691.473, 806.652]
+# CO_fluxes_halos = []
+# CO_fluxes_sats = []
 
-for freq in CO_obs_freqs:
-    CO_halos = []
-    for chunk in [1, 2, 3, 4]:
-        fn_halos = f"{dir_co}/sources/cen_chunk{chunk}_fluxCO_{freq}.h5"
+# for freq in CO_obs_freqs:
+#     CO_halos = []
+#     for chunk in [1, 2, 3, 4]:
+#         fn_halos = f"{dir_co}/sources/cen_chunk{chunk}_fluxCO_{freq}.h5"
 
-        print(fn_halos)
-        with h5py.File(fn_halos, "r") as f:
-            # List all groups (like folders in the file)
-            print(f"Keys:", list(f.keys()))
+#         print(fn_halos)
+#         with h5py.File(fn_halos, "r") as f:
+#             # List all groups (like folders in the file)
+#             print(f"Keys:", list(f.keys()))
 
-            # Access a dataset by key\n",
-            data = f["flux"][:]  # Load it into a NumPy array
-            print("Data shape:", data.shape)
-            # print("Data type:", data.dtype)
+#             # Access a dataset by key\n",
+#             data = f["flux"][:]  # Load it into a NumPy array
+#             print("Data shape:", data.shape)
+#             # print("Data type:", data.dtype)
 
-            CO_halos.append(data)
+#             CO_halos.append(data)
 
-    CO_fluxes_halos.append(np.concatenate(CO_halos, axis=1))
+#     CO_fluxes_halos.append(np.concatenate(CO_halos, axis=1))
 
-for freq in CO_obs_freqs:
-    CO_sats = []
-    for chunk in [1, 2, 3, 4]:
-        fn_sats = f"{dir_co}/sources/sat_chunk{chunk}_fluxCO_{freq}.h5"
+# for freq in CO_obs_freqs:
+#     CO_sats = []
+#     for chunk in [1, 2, 3, 4]:
+#         fn_sats = f"{dir_co}/sources/sat_chunk{chunk}_fluxCO_{freq}.h5"
 
-        print(fn_sats)
-        with h5py.File(fn_sats, "r") as f:
-            # List all groups (like folders in the file)
-            print(f"Keys:", list(f.keys()))
+#         print(fn_sats)
+#         with h5py.File(fn_sats, "r") as f:
+#             # List all groups (like folders in the file)
+#             print(f"Keys:", list(f.keys()))
 
-            # Access a dataset by key\n",
-            data = f["flux"][:]  # Load it into a NumPy array
-            print("Data shape:", data.shape)
-            # print("Data type:", data.dtype)
+#             # Access a dataset by key\n",
+#             data = f["flux"][:]  # Load it into a NumPy array
+#             print("Data shape:", data.shape)
+#             # print("Data type:", data.dtype)
 
-            CO_sats.append(data)
+#             CO_sats.append(data)
 
-    CO_fluxes_sats.append(np.concatenate(CO_sats, axis=1))
+#     CO_fluxes_sats.append(np.concatenate(CO_sats, axis=1))
 
-redshift_mask = (halos_co["redshift"] < max(redshift_range)) & (
-    halos_co["redshift"] > min(redshift_range)
-)
+# redshift_mask = (halos_co["redshift"] < max(redshift_range)) & (
+#     halos_co["redshift"] > min(redshift_range)
+# )
 
-maps_CO_090 = []
-maps_CO_150 = []
-maps_CO_220 = []
+# maps_CO_090 = []
+# maps_CO_150 = []
+# maps_CO_220 = []
 
-for i in range(len(CO_rest_freqs)):
-    print(f"Now on {i}...")
-    m = maps.make_sky(
-        halos_co,
-        weights=CO_fluxes_halos[0][i] + CO_fluxes_sats[0][i],
-        fwhm=fwhm,
-        mask=redshift_mask,
-        verbose=True,
-    )
-    p = maps.zoom_in(m)
+# for i in range(len(CO_rest_freqs)):
+#     print(f"Now on {i}...")
+#     m = maps.make_sky(
+#         halos_co,
+#         weights=CO_fluxes_halos[0][i] + CO_fluxes_sats[0][i],
+#         fwhm=fwhm,
+#         mask=redshift_mask,
+#         verbose=True,
+#     )
+#     p = maps.zoom_in(m)
 
-    maps_CO_090.append(p)
+#     maps_CO_090.append(p)
 
-    m = maps.make_sky(
-        halos_co,
-        weights=CO_fluxes_halos[1][i] + CO_fluxes_sats[1][i],
-        fwhm=fwhm,
-        mask=redshift_mask,
-        verbose=True,
-    )
-    p = maps.zoom_in(m)
+#     m = maps.make_sky(
+#         halos_co,
+#         weights=CO_fluxes_halos[1][i] + CO_fluxes_sats[1][i],
+#         fwhm=fwhm,
+#         mask=redshift_mask,
+#         verbose=True,
+#     )
+#     p = maps.zoom_in(m)
 
-    maps_CO_150.append(p)
+#     maps_CO_150.append(p)
 
-    m = maps.make_sky(
-        halos_co,
-        weights=CO_fluxes_halos[2][i] + CO_fluxes_sats[2][i],
-        fwhm=fwhm,
-        mask=redshift_mask,
-        verbose=True,
-    )
-    p = maps.zoom_in(m)
+#     m = maps.make_sky(
+#         halos_co,
+#         weights=CO_fluxes_halos[2][i] + CO_fluxes_sats[2][i],
+#         fwhm=fwhm,
+#         mask=redshift_mask,
+#         verbose=True,
+#     )
+#     p = maps.zoom_in(m)
 
-    maps_CO_220.append(p)
+#     maps_CO_220.append(p)
 
-print("saving CO patches...")
-np.save(f"{dir_save}/maps_CO_090", maps_CO_090)
-np.save(f"{dir_save}/maps_CO_150", maps_CO_150)
-np.save(f"{dir_save}/maps_CO_220", maps_CO_220)
+# print("saving CO patches...")
+# np.save(f"{dir_save}/maps_CO_090", maps_CO_090)
+# np.save(f"{dir_save}/maps_CO_150", maps_CO_150)
+# np.save(f"{dir_save}/maps_CO_220", maps_CO_220)
 
 print("finished!")
 
