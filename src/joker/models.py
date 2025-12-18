@@ -35,13 +35,20 @@ def tSZ_per_nu(nu):
     return scaling
 
 
-def synchrotron_per_nu(nu):
+def synchrotron_per_nu(nu, nu_ref=30e9, sync_beta=-1.2):
     # Reference frequency
-    nu_ref = 30.0 * 1.0e9  # Hz
-    sync_beta = -1.2
-
+    # Hz
+    #
     scaling = (nu / nu_ref) ** sync_beta  # * G_nu(nu_ref, Tcmb) / G_nu(nu, Tcmb)
 
+    return scaling
+
+
+def dust_per_nu(nu, nu_ref=353e9, dust_T=20.0, dust_beta=1.6):
+    scaling = (nu / nu_ref) ** dust_beta * B_nu(nu, dust_T) / B_nu(353.0 * 1e9, dust_T)
+    #   * G_nu(nu_ref, Tcmb) \
+    # * G_nu(nu, Tcmb) )
+    #
     return scaling
 
 

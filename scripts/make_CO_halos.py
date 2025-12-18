@@ -1,4 +1,6 @@
 # from astropy.io import fits
+import os
+
 import h5py
 import healpy as hp
 import numpy as np
@@ -9,19 +11,30 @@ import joker.maps as maps
 
 print("hello, world!")
 
-dir_data = "/data/cluster/emc-brid/Datasets/Websky"
-dir_save = f"{dir_data}/patches_z2p4_to_3p4"
-dir_co = f"{dir_data}/cib_co_sources"
+dir_home = "/home/emc-brid"
+dir_Websky = f"/data/cluster/emc-brid/Datasets/Websky"
+dir_websky = f"{dir_Websky}/websky/v0.0"
+dir_rewrite = f"{dir_Websky}/websky_halos_rewrite"
+dir_co = f"{dir_Websky}/cib_co_sources"
+dir_data = "/data/cluster/emc-brid/Datasets/Websky/maps/correlations_to_halofield"
 
-print(f"SAVING ALL FILES TO {dir_save}!")
+resolution = 4096
+
+redshifts_bands = [(0.5 * i, 0.5 * i + 0.5) for i in range(10)]
+redshifts_bands = redshifts_bands[:-1]
+print(f"SAVING ALL FILES TO {dir_data}")
 
 print("=====================================")
 
-fwhm = np.deg2rad(20.0 / 60)  # to convert arcmin to degrees
-redshift_range = [2.4, 3.4]
+fwhm = 5.0  # arcmin
+fwhm = np.deg2rad(fwhm / 60)  # to convert arcmin to degrees
+
+coordinates = (20, -30)
+width = 10
+height = 10
 
 print()
-print("Now loading CO signal...")
+print("Now loading CO halos...")
 
 halo_fn_co = f"{dir_co}/websky_halos-light.hdf5"
 with h5py.File(halo_fn_co, "r") as f:
@@ -38,6 +51,8 @@ CO_obs_freqs = ["090", "150", "220"]
 CO_rest_freqs = [115.271, 230.538, 345.796, 461.041, 576.268, 691.473, 806.652]
 CO_fluxes_halos = []
 
+print("Now loading CO fluxes...")
+
 for freq in CO_obs_freqs:
     CO_halos = []
     for chunk in [1, 2, 3, 4]:
@@ -45,65 +60,79 @@ for freq in CO_obs_freqs:
 
         print(fn_halos)
         with h5py.File(fn_halos, "r") as f:
-            # List all groups (like folders in the file)
-            print(f"Keys:", list(f.keys()))
-
-            # Access a dataset by key\n",
             data = f["flux"][:]  # Load it into a NumPy array
-            print("Data shape:", data.shape)
-            # print("Data type:", data.dtype)
-
             CO_halos.append(data)
 
     CO_fluxes_halos.append(np.concatenate(CO_halos, axis=1))
 
-redshift_mask = (halos_co["redshift"] < max(redshift_range)) & (
-    halos_co["redshift"] > min(redshift_range)
-)
+for i, dz in enumerate(redshifts_bands):
+    print("========================================================")
+    print(f"Now probing a redshift range of delta_z = {dz}...")
+    print("========================================================")
+    redshift_mask = (halos_co["redshift"] < max(dz)) & (halos_co["redshift"] >= min(dz))
 
-maps_CO_090 = []
-maps_CO_150 = []
-maps_CO_220 = []
-
-for i in range(len(CO_rest_freqs)):
-    print(f"Now on {i}...")
-    m = maps.make_sky(
-        halos_co,
-        weights=CO_fluxes_halos[0][i],
-        fwhm=fwhm,
-        mask=redshift_mask,
-        verbose=True,
+    print(
+        f"{(np.sum(redshift_mask) / len(halos_co['redshift'])) * 100:.2f}% of halos are within this redshift slice..."
     )
-    p = maps.zoom_in(m)
+    print()
+    print("making CO maps...")
 
-    maps_CO_090.append(p)
+    fn = f"{dir_data}/correlations_to_halofield/CO_maps_z{min(dz)}_to_z{max(dz)}"
+    if os.path.exists(f"{fn}.npy"):
+        print(f"file {fn} already written...")
+        continue
 
-    m = maps.make_sky(
-        halos_co,
-        weights=CO_fluxes_halos[1][i],
-        fwhm=fwhm,
-        mask=redshift_mask,
-        verbose=True,
-    )
-    p = maps.zoom_in(m)
+    maps_CO_090_halos = []
+    maps_CO_150_halos = []
+    maps_CO_220_halos = []
 
-    maps_CO_150.append(p)
+    for j in range(len(CO_rest_freqs)):
+        print(f"\t Now on nu_rest={CO_rest_freqs[i]}...")
+        m = maps.make_sky(
+            halos_co,
+            weights=CO_fluxes_halos[0][j],
+            fwhm=fwhm,
+            mask=redshift_mask,
+            verbose=True,
+        )
+        p = maps.zoom_in(m, coordinates=coordinates, height=height, width=width)
 
-    m = maps.make_sky(
-        halos_co,
-        weights=CO_fluxes_halos[2][i],
-        fwhm=fwhm,
-        mask=redshift_mask,
-        verbose=True,
-    )
-    p = maps.zoom_in(m)
+        maps_CO_090_halos.append(p)
 
-    maps_CO_220.append(p)
+        m = maps.make_sky(
+            halos_co,
+            weights=CO_fluxes_halos[1][j],
+            fwhm=fwhm,
+            mask=redshift_mask,
+            verbose=True,
+        )
+        p = maps.zoom_in(m, coordinates=coordinates, height=height, width=width)
 
-print("saving CO patches...")
-np.save(f"{dir_save}/maps_CO_090", maps_CO_090_halos)
-np.save(f"{dir_save}/maps_CO_150", maps_CO_150_halos)
-np.save(f"{dir_save}/maps_CO_220", maps_CO_220_halos)
+        maps_CO_150_halos.append(p)
+
+        m = maps.make_sky(
+            halos_co,
+            weights=CO_fluxes_halos[2][j],
+            fwhm=fwhm,
+            mask=redshift_mask,
+            verbose=True,
+        )
+        p = maps.zoom_in(m, coordinates=coordinates, height=height, width=width)
+
+        maps_CO_220_halos.append(p)
+
+    print("saving CO halo maps...")
+    np.save(f"{dir_data}/maps_CO_090_z{min(dz)}_to_z{max(dz)}", maps_CO_090_halos)
+    np.save(f"{dir_data}/maps_CO_150_z{min(dz)}_to_z{max(dz)}", maps_CO_150_halos)
+    np.save(f"{dir_data}/maps_CO_220_z{min(dz)}_to_z{max(dz)}", maps_CO_220_halos)
+
+    LIM_maps = [maps_CO_090_halos, maps_CO_150_halos, maps_CO_220_halos]
+    LIM_maps = np.asarray(LIM_maps)
+
+    print(f"saving CO maps to {fn}...")
+    np.save(fn, LIM_maps)
+    print()
+
 
 print("finished!")
 
