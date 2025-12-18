@@ -57,14 +57,16 @@ print("Now loading CO fluxes...")
 def load_CO_fluxes(nu_obs, dir=dir_co):
     fluxes = []
     for chunk in [1, 2, 3, 4]:
-        fn_halos = f"{dir}/sources/cen_chunk{chunk}_fluxCO_{freq}.h5"
+        fn_halos = f"{dir}/sources/cen_chunk{chunk}_fluxCO_{nu}.h5"
 
         print(f"\t {fn_halos}")
         with h5py.File(fn_halos, "r") as f:
             data = f["flux"][:]  # Load it into a NumPy array
             fluxes.append(data)
 
-    return np.asarray(fluxes)
+    fluxes = np.concatenate(fluxes, axis=1)
+
+    return fluxes
 
 
 def make_CO_maps(fluxes, dz, nu_obs):
@@ -101,7 +103,7 @@ for nu in CO_obs_freqs:
     print("========================================================")
     fluxes = load_CO_fluxes(nu)
     for i, dz in enumerate(redshifts_bands):
-        fn = f"{dir_data}/correlations_to_halofield/CO_maps_nu{nu}_z{min(dz)}_to_z{max(dz)}"
+        fn = f"{dir_data}/CO_maps_nu{nu}_z{min(dz)}_to_z{max(dz)}"
         if os.path.exists(f"{fn}.npy"):
             print(f"file {fn} already written...")
             continue
@@ -110,9 +112,8 @@ for nu in CO_obs_freqs:
         print("========================================================")
         maps_nu = make_CO_maps(fluxes, dz, nu)
 
-    print("saving CO map...")
-    np.save(f"{dir_data}/maps_CO_nu{nu}_z{min(dz)}_to_z{max(dz)}", maps_nu)
-
+        print("saving CO map to {fn}...")
+        np.save(fn, maps_nu)
 
 print("finished!")
 
