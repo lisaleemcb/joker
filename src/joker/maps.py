@@ -29,6 +29,7 @@ import sys
 import h5py
 import healpy as hp
 import matplotlib.pyplot as plt
+import numpy as np
 
 from joker import __version__
 from joker.cosmology import *
@@ -51,12 +52,12 @@ resolution = 4096
 
 def make_halo_catalogue(filename, verbose=False):
     if verbose:
-        print(f"Loading halo catalogue from {filename}")
+        print(f"\t loading halo catalogue from {filename}...")
     halos = {}
 
     basename, ext = os.path.splitext(filename)
     if verbose:
-        print(f"Parsing file type {ext}...")
+        print(f"\t parsing file type {ext}...")
 
     allowed_exts = [".hdf5", ".h5", ".npz"]
     if ext not in allowed_exts:
@@ -115,15 +116,22 @@ def make_sky(
 
     if fwhm is not None:
         if verbose:
-            print(f"Smoothing map assuming fwhm={fwhm:.3f}...")
+            print(f"\t smoothing map assuming fwhm={fwhm:.3f}...")
 
         sky = hp.sphtfunc.smoothing(sky, fwhm=fwhm)
 
     return sky
 
 
-def zoom_in(sky, nside=resolution, coordinates=(0.0, -20.0), width=10, height=10):
+def zoom_in(
+    sky, nside=resolution, coordinates=(0.0, -20.0), width=10, height=10, verbose=False
+):
     ra, dec = coordinates
+
+    if verbose:
+        print(
+            f"\t zooming in to a {width}x{height} patch, centered on ra={ra}, dec={dec}..."
+        )
 
     # Convert to radians
     theta_center = np.radians(90 - dec)
