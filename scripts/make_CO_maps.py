@@ -51,10 +51,8 @@ CO_obs_freqs = ["090", "150", "220"]
 CO_rest_freqs = [115.271, 230.538, 345.796, 461.041, 576.268, 691.473, 806.652]
 CO_fluxes_halos = []
 
-print("Now loading CO fluxes...")
-
-
 def load_CO_fluxes(nu_obs, dir=dir_co):
+    print("Now loading CO fluxes..."
     fluxes = []
     for chunk in [1, 2, 3, 4]:
         fn_halos = f"{dir}/sources/cen_chunk{chunk}_fluxCO_{nu}.h5"
@@ -112,7 +110,7 @@ for nu in CO_obs_freqs:
         print("========================================================")
         maps_nu = make_CO_maps(fluxes, dz, nu)
 
-        print("saving CO map to {fn}...")
+        print(f"saving CO map to {fn}...")
         np.save(fn, maps_nu)
 
 print("finished!")
