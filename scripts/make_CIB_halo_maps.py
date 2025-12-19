@@ -62,7 +62,7 @@ def load_fluxes(nu_obs, dir=dir_co):
             data = f["flux"][:]  # Load it into a NumPy array
             fluxes.append(data)
 
-    fluxes = np.concatenate(fluxes, axis=1)
+    fluxes = np.concatenate(fluxes)
 
     return fluxes
 
